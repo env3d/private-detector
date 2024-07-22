@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <style>
+      #results {
+	  position: fixed;
+	  top: 50px;
+	  left: 10px;
+	  color: white;
+	  font-size: 24;
+      }
+
+      #results span {
+	  margin: 5px 5px;
+      }
+      
+      video {
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+      }
+
+      h1 {
+	  position: fixed;
+	  bottom: 0;
+	  left: 0;
+      }
+
+      button {
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Basic Cloud Vision (Google) Demo -->
+
+    <video autoplay="true" id="videoElement"></video>
+    <button id="vision_button">Analyze</button>
+    <div id='results'></div>
+    
+    <script>
+
+      // Access camera 
+      var video = document.querySelector("#videoElement");      
+      if (navigator.mediaDevices.getUserMedia) {       
+	  navigator.mediaDevices.getUserMedia({video: true})
+	      .then(function(stream) {
+		  video.srcObject = stream;
+	      })
+	      .catch(function(err) {
+		  console.log("Something went wrong!");
+	      });
+      }
+
+      // We only get to work when the vision button is clicked
+      document.querySelector("#vision_button").addEventListener('click', evt => {
+	  // extract image as base64, scale it down to reduce data transfer speed	  
+	  var scale = 0.25;
+	  var canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth * scale;
+          canvas.height = video.videoHeight * scale;
+          canvas.getContext('2d')
+              .drawImage(video, 0, 0, canvas.width, canvas.height);
+
+	  // dataUrl contains base64 version of image
+          var dataUrl = canvas.toDataURL("image/jpeg");
+
+
+	  // Send image to api
+	  fetch('/api', {
+	      method: 'POST',
+	      headers: {
+		  'Content-Type': 'application/json'
+	      },
+	      body: JSON.stringify({
+		  image: dataUrl.substring('data:image/jpeg;base64,'.length).replace(/\+/g, '-').replace(/\//g, '_')
+	      })
+	  }).then( resp => {
+	      return resp.json();
+	  }).then( json => {
+	      // Simply output the response
+	      console.log(json);
+              results.innerHTML = 'Chance of inappropriate image: '+parseFloat(json['probability']*100).toFixed(2)+'%'
+      
+	  });
+      });
+      
+    </script>
+  </body>
+</html>

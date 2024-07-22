@@ -34,7 +34,7 @@ def read_image(filename: str) -> tf.Tensor:
 
     return image
 
-
+    
 def inference(model: str , image_paths: List[str]) -> None:
     """
     Get predictions with a Private Detector model
@@ -46,7 +46,7 @@ def inference(model: str , image_paths: List[str]) -> None:
     image_paths : List[str]
         Path(s) to image to be predicted on
     """
-    model = tf.saved_model.load(model)
+
 
     for image_path in image_paths:
         image = read_image(image_path)
