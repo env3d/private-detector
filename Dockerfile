@@ -1,9 +1,11 @@
-FROM mcr.microsoft.com/devcontainers/python:3.8
+FROM nvidia/cuda:12.5.1-runtime-ubuntu22.04
 
-RUN pip install tensorflow tensorflowjs keras flask gunicorn
-RUN pip install tensorflow_addons
+RUN apt update
+RUN apt -yq install python3 python3-pip python-is-python3
+RUN pip install tensorflow[with-cuda]
+RUN pip install flask gunicorn
 
-WORKDIR /home/vscode
+WORKDIR /root
 
 EXPOSE 8080
 
